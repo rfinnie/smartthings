@@ -42,7 +42,7 @@ Once the proxy is running, test it (`json_pp` is optional but formats the output
 
 ```
 # Status
-$ curl -s --data-binary '{"system":{"get_sysinfo":{"state":null}}}}' -H "Content-type: application/json" http://10.9.8.1:8362/command | json_pp
+$ curl -s --data-binary '{"system":{"get_sysinfo":{"state":null}}}}' -H "Content-type: application/json" http://10.128.67.5:8362/command | json_pp
 {
    "system" : {
       "get_sysinfo" : {
@@ -73,7 +73,7 @@ $ curl -s --data-binary '{"system":{"get_sysinfo":{"state":null}}}}' -H "Content
 }
 
 # Turn on outlet
-$ curl -s --data-binary '{"system":{"set_relay_state":{"state":1}}}}' -H 'Content-type: application/json' http://10.9.8.1:8362/command | json_pp
+$ curl -s --data-binary '{"system":{"set_relay_state":{"state":1}}}}' -H 'Content-type: application/json' http://10.128.67.5:8362/command | json_pp
 {
    "system" : {
       "set_relay_state" : {
@@ -83,7 +83,7 @@ $ curl -s --data-binary '{"system":{"set_relay_state":{"state":1}}}}' -H 'Conten
 }
 
 # Turn off outlet
-$ curl -s --data-binary '{"system":{"set_relay_state":{"state":0}}}}' -H 'Content-type: application/json' http://10.9.8.1:8362/command | json_pp
+$ curl -s --data-binary '{"system":{"set_relay_state":{"state":0}}}}' -H 'Content-type: application/json' http://10.128.67.5:8362/command | json_pp
 {
    "system" : {
       "set_relay_state" : {
