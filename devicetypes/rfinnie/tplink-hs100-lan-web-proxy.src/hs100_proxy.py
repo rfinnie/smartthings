@@ -20,6 +20,7 @@
 
 import BaseHTTPServer
 import socket
+import json
 
 
 class HS100Handler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -102,6 +103,33 @@ class HS100Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header('Content-Length', len(result))
         self.end_headers()
         self.wfile.write(result)
+
+    def do_GET(self):
+        command_data = json.dumps({
+            'system': {
+                'get_sysinfo': {
+                    'state': None,
+                }
+            }
+        })
+        try:
+            result = self.send_command(
+                self.config.hs100_addr,
+                self.config.hs100_port,
+                command_data
+            )
+        except socket.error as e:
+            return self.error_500(str(e))
+        except Exception as e:
+            return self.error_500('Unknown exception: ' + str(e))
+        result_d = json.loads(result)
+        output = ''
+        for (k, v) in sorted(result_d['system']['get_sysinfo'].items()):
+            output += '%s: %s\n' % (k, v)
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(output)
 
 
 def parse_args():
