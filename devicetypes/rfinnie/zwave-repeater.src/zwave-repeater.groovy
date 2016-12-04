@@ -13,7 +13,9 @@
  */
 metadata {
 	definition (name: "Z-Wave Repeater", namespace: "rfinnie", author: "Ryan Finnie") {
+		capability "Polling"
 		capability "Refresh"
+		capability "Health Check"
 
 		fingerprint mfr:"0246", prod:"0001", deviceJoinName: "Iris Smart Plug Z-Wave Repeater"
 	}
@@ -25,6 +27,11 @@ metadata {
 		main "refresh"
 		details(["refresh"])
 	}
+}
+
+def updated(){
+	// Device-Watch simply pings if no device events received for 32min(checkInterval)
+	sendEvent(name: "checkInterval", value: 2 * 15 * 60 + 2 * 60, displayed: false, data: [protocol: "zwave", hubHardwareId: device.hub.hardwareID])
 }
 
 def parse(String description) {
@@ -50,9 +57,15 @@ def zwaveEvent(physicalgraph.zwave.commands.versionv1.VersionReport cmd) {
 }
 
 def zwaveEvent(physicalgraph.zwave.commands.manufacturerspecificv2.ManufacturerSpecificReport cmd) {
+	log.debug "manufacturerId:   ${cmd.manufacturerId}"
+	log.debug "manufacturerName: ${cmd.manufacturerName}"
+	log.debug "productId:        ${cmd.productId}"
+	log.debug "productTypeId:    ${cmd.productTypeId}"
 	def msr = String.format("%04X-%04X-%04X", cmd.manufacturerId, cmd.productTypeId, cmd.productId)
 	log.debug "MSR: $msr"
 	updateDataValue("MSR", msr)
+	updateDataValue("manufacturer", cmd.manufacturerName)
+	createEvent([descriptionText: "$device.displayName MSR: $msr", isStateChange: false])
 }
 
 
@@ -61,6 +74,10 @@ def zwaveEvent(physicalgraph.zwave.commands.powerlevelv1.PowerlevelReport cmd) {
 }
 
 def ping() {
+	refresh()
+}
+
+def poll() {
 	refresh()
 }
 
