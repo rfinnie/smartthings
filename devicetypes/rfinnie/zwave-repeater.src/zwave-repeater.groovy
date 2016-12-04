@@ -55,6 +55,12 @@ def zwaveEvent(physicalgraph.zwave.commands.manufacturerspecificv2.ManufacturerS
 	updateDataValue("MSR", msr)
 }
 
+
+def zwaveEvent(physicalgraph.zwave.commands.powerlevelv1.PowerlevelReport cmd) {
+	log.debug "Radio power level: $cmd"
+	updateDataValue("powerLevel", cmd.powerLevel)
+}
+
 def ping() {
 	refresh()
 }
@@ -62,6 +68,7 @@ def ping() {
 def refresh() {
 	delayBetween([
 		zwave.versionV1.versionGet().format(),
-		zwave.manufacturerSpecificV2.manufacturerSpecificGet().format()
-	], 500)
+		zwave.manufacturerSpecificV2.manufacturerSpecificGet().format(),
+		zwave.powerlevelV1.powerlevelGet().format()
+	], 200)
 }
