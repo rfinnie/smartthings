@@ -58,7 +58,6 @@ def zwaveEvent(physicalgraph.zwave.commands.manufacturerspecificv2.ManufacturerS
 
 def zwaveEvent(physicalgraph.zwave.commands.powerlevelv1.PowerlevelReport cmd) {
 	log.debug "Radio power level: $cmd"
-	updateDataValue("powerLevel", cmd.powerLevel)
 }
 
 def ping() {
