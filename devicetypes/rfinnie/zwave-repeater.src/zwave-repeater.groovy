@@ -40,7 +40,7 @@ def parse(String description) {
 	if (description.startsWith("Err")) {
 		result = createEvent(descriptionText:description, isStateChange:true)
 	} else {
-		def cmd = zwave.parse(description, [0x20: 1, 0x84: 1, 0x98: 1, 0x56: 1, 0x60: 3])
+		def cmd = zwave.parse(description, [0x86: 1, 0x72: 2, 0x73: 1])
 		if (cmd) {
 			result += zwaveEvent(cmd)
 		}
