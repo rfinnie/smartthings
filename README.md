@@ -135,6 +135,7 @@ To initiate Z-Wave setup, go to add a new Thing in the SmartThings app, then wit
 
 [Other Z-Wave repeaters](http://products.z-wavealliance.org/regions/2/categories/15/products) should work with this device handler, but will require manual setup.
 Add the device through the SmartThings app, then edit the Thing in the Developer API and change Type to "Z-Wave Repeater".
+(If this works for you, please consider filing an Issue to get your device added, specifying the Raw Description of the device.)
 
 Z-Wave repeaters will appear in the app with the primary function being Refresh, which effectively does nothing except query the device firmware version.
 These repeaters should also not show up in Alexa.
