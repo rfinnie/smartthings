@@ -14,6 +14,8 @@
 metadata {
 	definition (name: "Z-Wave Repeater", namespace: "rfinnie", author: "Ryan Finnie") {
 		capability "Refresh"
+
+		fingerprint mfr:"0246", prod:"0001", deviceJoinName: "Iris Smart Plug Z-Wave Repeater"
 	}
 
 	tiles(scale: 2) {
