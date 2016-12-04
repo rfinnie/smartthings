@@ -11,7 +11,7 @@ A side effect of this is if you have Alexa intergration, they will be exported t
 
 Install the device handler in the Developer API.
 
-The device handler automatically supports the following repeaters:
+The device handler automatically supports the following [Z-Wave repeaters](http://products.z-wavealliance.org/regions/2/categories/15/products):
 
   - Iris Smart Plug Z-Wave Repeater
   - Aeon Labs DSD37-ZWUS Repeater
