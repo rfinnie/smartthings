@@ -17,7 +17,7 @@ metadata {
 		capability "Refresh"
 		capability "Health Check"
 
-		fingerprint mfr:"0246", prod:"0001", deviceJoinName: "Iris Smart Plug Z-Wave Repeater"
+		fingerprint mfr:"0246", prod:"0001", model:"0001", deviceJoinName: "Iris Smart Plug Z-Wave Repeater"
 	}
 
 	tiles(scale: 2) {
