@@ -7,6 +7,9 @@ However, it has an undocumented local interface on port 9999, which is XOR-obfus
 SmartThings does not allow for local LAN direct TCP communication, but does allow for local LAN HTTP communication, so we will use an HTTP proxy to talk to it.
 This local LAN proxy allows for POSTing JSON to the service, and receiving JSON replies, which the device handler can work with.
 
+Be warned: this handler and proxy rely on an undocumented and obfuscated protocol of the TP-LINK HS100, which could change at any time.
+It has been tested as of firmware 1.2.2 (Build 170907 Rel.164228).
+
 ## Device setup
 
 You may want to give your device a static DHCP-assigned IP on your LAN for convenience and stability ahead of time.
