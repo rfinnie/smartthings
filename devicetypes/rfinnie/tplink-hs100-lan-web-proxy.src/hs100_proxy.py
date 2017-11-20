@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # hs100_proxy - TP-LINK Smart Plug HS100 LAN web proxy
 # Copyright (C) 2016 Ryan Finnie
@@ -18,36 +18,36 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
 
-import BaseHTTPServer
+import http.server
 import socket
 import json
 
 
-class HS100Handler(BaseHTTPServer.BaseHTTPRequestHandler):
+class HS100Handler(http.server.BaseHTTPRequestHandler):
     post_body = None
     config = None
 
     def decode(self, a):
         code = 0xab
-        b = ''
+        b = b''
         for i in a:
-            b += chr(ord(i) ^ code)
-            code = ord(i)
+            b += bytes([i ^ code])
+            code = i
         return b
 
     def encode(self, a):
         code = 0xab
-        b = ''
+        b = b''
         for i in a:
-            b += chr((ord(i) ^ code))
-            code = (ord(b[len(b) - 1]))
+            code = i ^ code
+            b += bytes([code])
         return b
 
     def send_command(self, host, port, command):
         sock = socket.socket()
         sock.connect((host, port))
 
-        sock.send('\x00\x00\x00\x23' + self.encode(command))
+        sock.send(b'\x00\x00\x00\x23' + self.encode(command))
 
         result = self.decode(sock.recv(8192)[4:])
         sock.close()
@@ -55,37 +55,38 @@ class HS100Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         return result
 
     def log_request(self, code='-', size='-', user_agent='-', extra='-'):
-        if self.headers.getheader('User-Agent'):
-            user_agent = self.headers.getheader('User-Agent')
+        if self.headers.get('User-Agent'):
+            user_agent = self.headers.get('User-Agent')
         if self.post_body:
-            extra = self.post_body
+            extra = self.post_body.decode('UTF-8')
         extra = extra.replace('\r', '').replace('\n', '')
         if len(extra) > 100:
             extra = extra[0:97] + '...'
-        self.log_message(
-            '"%s" %s %s "-" "%s" "%s"',
+        self.log_message('"{}" {} {} "-" "{}" "{}"'.format(
             self.requestline,
             str(code),
             str(size),
             user_agent,
             extra,
-        )
+        ))
 
     def error_500(self, message):
+        message_bytes = message.encode('UTF-8')
         self.send_response(500)
-        self.send_header('Content-Type', 'text/plain')
+        self.send_header('Content-Type', 'text/plain; charset=utf-8')
+        self.send_header('Content-Length', len(message_bytes))
         self.end_headers()
-        self.wfile.write(message)
+        self.wfile.write(message_bytes)
 
     def do_POST(self):
-        if not self.headers.getheader('Content-Length'):
+        if not self.headers.get('Content-Length'):
             self.send_response(400)
-            self.send_header('Content-Type', 'text/plain')
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
             self.end_headers()
-            self.wfile.write('Content-Length required.')
+            self.wfile.write('Content-Length required.'.encode('UTF-8'))
             return
         command_data = self.rfile.read(
-            int(self.headers.getheader('Content-Length'))
+            int(self.headers.get('Content-Length'))
         )
         self.post_body = command_data
         try:
@@ -99,7 +100,7 @@ class HS100Handler(BaseHTTPServer.BaseHTTPRequestHandler):
         except Exception as e:
             return self.error_500('Unknown exception: ' + str(e))
         self.send_response(200)
-        self.send_header('Content-Type', 'application/json')
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
         self.send_header('Content-Length', len(result))
         self.end_headers()
         self.wfile.write(result)
@@ -111,7 +112,7 @@ class HS100Handler(BaseHTTPServer.BaseHTTPRequestHandler):
                     'state': None,
                 }
             }
-        })
+        }).encode('UTF-8')
         try:
             result = self.send_command(
                 self.config.hs100_addr,
@@ -122,14 +123,16 @@ class HS100Handler(BaseHTTPServer.BaseHTTPRequestHandler):
             return self.error_500(str(e))
         except Exception as e:
             return self.error_500('Unknown exception: ' + str(e))
-        result_d = json.loads(result)
+        result_d = json.loads(result.decode('UTF-8'))
         output = ''
         for (k, v) in sorted(result_d['system']['get_sysinfo'].items()):
-            output += '%s: %s\n' % (k, v)
+            output += '{}: {}\n'.format(k, v)
+        output_bytes = output.encode('UTF-8')
         self.send_response(200)
-        self.send_header('Content-Type', 'text/plain')
+        self.send_header('Content-Type', 'text/plain; charset=utf-8')
+        self.send_header('Content-Length', len(output_bytes))
         self.end_headers()
-        self.wfile.write(output)
+        self.wfile.write(output_bytes)
 
 
 def parse_args():
@@ -160,7 +163,7 @@ def parse_args():
 
 if __name__ == '__main__':
     config = parse_args()
-    server_class = BaseHTTPServer.HTTPServer
+    server_class = http.server.HTTPServer
     httpd = server_class((config.local_addr, config.local_port), HS100Handler)
     httpd.RequestHandlerClass.config = config
     try:
