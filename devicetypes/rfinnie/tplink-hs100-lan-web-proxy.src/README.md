@@ -10,7 +10,7 @@ This local LAN proxy allows for POSTing JSON to the service, and receiving JSON 
 Be warned: this handler and proxy rely on an undocumented and obfuscated protocol of the TP-LINK HS100, which could change at any time.
 It has been tested as of the following firmwares:
 * HS100: 1.2.2 Build 170907 Rel.164228
-* HS105: 1.2.9 Build 170808 Rel.145916
+* HS105: 1.5.1 Build 171109 Rel.165500
 
 ## Device setup
 
