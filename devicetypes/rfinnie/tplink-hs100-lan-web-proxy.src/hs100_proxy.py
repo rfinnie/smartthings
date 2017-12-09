@@ -21,6 +21,7 @@
 import http.server
 import socket
 import json
+import struct
 
 
 class HS100Handler(http.server.BaseHTTPRequestHandler):
@@ -47,7 +48,7 @@ class HS100Handler(http.server.BaseHTTPRequestHandler):
         sock = socket.socket()
         sock.connect((host, port))
 
-        sock.send(b'\x00\x00\x00\x23' + self.encode(command))
+        sock.send(struct.pack('!l', len(command)) + self.encode(command))
 
         result = self.decode(sock.recv(8192)[4:])
         sock.close()
