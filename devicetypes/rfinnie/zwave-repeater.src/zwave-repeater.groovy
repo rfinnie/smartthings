@@ -18,7 +18,9 @@ metadata {
 		capability "Health Check"
 
 		fingerprint mfr:"0086", prod:"0004", model:"0025", deviceJoinName: "Aeon Labs DSD37-ZWUS Repeater"
+		fingerprint mfr:"0086", prod:"0004", model:"0075", deviceJoinName: "Aeotec Range Extender 6"
 		fingerprint mfr:"0086", prod:"0104", model:"0075", deviceJoinName: "Aeotec Range Extender 6"
+		fingerprint mfr:"0086", prod:"0204", model:"0075", deviceJoinName: "Aeotec Range Extender 6"
 		fingerprint mfr:"0109", prod:"2012", model:"1203", deviceJoinName: "Vision Security Repeater ZR1202US"
 		fingerprint mfr:"0109", prod:"2012", model:"1206", deviceJoinName: "Vision Z-Wave Repeater"
 		fingerprint mfr:"0246", prod:"0001", model:"0001", deviceJoinName: "Iris Smart Plug Z-Wave Repeater"
