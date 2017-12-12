@@ -106,6 +106,49 @@ class HS100Handler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(result)
 
+    def result_status_text(self, r):
+        output = 'SERVER INFORMATION\n'
+        output += '    {:16}: {}\n'.format(
+            'Date', self.date_time_string()
+        )
+        output += '    {:16}: {}:{}\n'.format(
+            'Device', self.config.hs100_addr, self.config.hs100_port
+        )
+        output += '    {:16}: {}:{}\n'.format(
+            'Local', self.config.local_addr, self.config.local_port
+        )
+        output += '    {:16}: {}:{}\n'.format(
+            'Remote', self.client_address[0], self.client_address[1]
+        )
+        output += '    {:16}: {}\n'.format(
+            'User agent', self.headers.get('User-Agent')
+        )
+
+        output += '\nDEVICE STATUS\n'
+        for (k, v) in sorted(r['system']['get_sysinfo'].items()):
+            output += '    {:16}: {}\n'.format(k, v)
+
+        output += '\nEXAMPLES\n\n'
+
+        def example_curl(command):
+            return '    {}\n\n'.format(
+                'curl -s --data-binary \'{}\' -H "Content-type: application/json" http://{}/command | json_pp'.format(
+                    json.dumps(command),
+                    self.headers.get('Host'),
+                )
+            )
+
+        output += 'Device status:\n'
+        output += example_curl({'system':{'get_sysinfo':{'state': None}}})
+
+        output += 'Turn on outlet:\n'
+        output += example_curl({'system':{'set_relay_state':{'state': 1}}})
+
+        output += 'Turn off outlet:\n'
+        output += example_curl({'system':{'set_relay_state':{'state': 0}}})
+
+        return output
+
     def do_GET(self):
         command_data = json.dumps({
             'system': {
@@ -125,9 +168,7 @@ class HS100Handler(http.server.BaseHTTPRequestHandler):
         except Exception as e:
             return self.error_500('Unknown exception: ' + str(e))
         result_d = json.loads(result.decode('UTF-8'))
-        output = ''
-        for (k, v) in sorted(result_d['system']['get_sysinfo'].items()):
-            output += '{}: {}\n'.format(k, v)
+        output = self.result_status_text(result_d)
         output_bytes = output.encode('UTF-8')
         self.send_response(200)
         self.send_header('Content-Type', 'text/plain; charset=utf-8')
