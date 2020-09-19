@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# hs100_proxy - TP-LINK Smart Plug HS100 LAN web proxy
+# hs100_proxy - TP-LINK Smart Plug HS100/HS105/HS110 LAN web proxy
 # Copyright (C) 2016 Ryan Finnie
 #
 # This program is free software; you can redistribute it and/or
@@ -164,7 +164,7 @@ def parse_args():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="hs100_proxy - TP-LINK Smart Plug HS100 LAN web proxy",
+        description="hs100_proxy - TP-LINK Smart Plug HS100/HS105/HS110 LAN web proxy",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
@@ -174,10 +174,14 @@ def parse_args():
         "--local-addr", type=str, default="0.0.0.0", help="local address for web server"
     )
     parser.add_argument(
-        "--hs100-port", "-p", type=int, default=9999, help="port for HS100 device"
+        "--hs100-port",
+        "-p",
+        type=int,
+        default=9999,
+        help="port for HS100/HS105/HS110 device",
     )
     parser.add_argument(
-        "hs100_addr", type=str, help="address/hostname for HS100 device"
+        "hs100_addr", type=str, help="address/hostname for HS100/HS105/HS110 device"
     )
     return parser.parse_args()
 
