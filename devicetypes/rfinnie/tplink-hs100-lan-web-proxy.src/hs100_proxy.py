@@ -28,21 +28,24 @@ class HS100Handler(http.server.BaseHTTPRequestHandler):
     post_body = None
     config = None
 
-    def decode(self, a):
-        code = 0xAB
-        b = b""
-        for i in a:
-            b += bytes([i ^ code])
-            code = i
-        return b
+    def decode(self, input):
+        input_len = len(input)
+        state = 0xAB
+        output = bytearray(input_len)
+        for pos in range(input_len):
+            i = input[pos]
+            output[pos] = i ^ state
+            state = i
+        return bytes(output)
 
-    def encode(self, a):
-        code = 0xAB
-        b = b""
-        for i in a:
-            code = i ^ code
-            b += bytes([code])
-        return b
+    def encode(self, input):
+        input_len = len(input)
+        state = 0xAB
+        output = bytearray(input_len)
+        for pos in range(input_len):
+            state = input[pos] ^ state
+            output[pos] = state
+        return bytes(output)
 
     def send_command(self, host, port, command):
         sock = socket.socket()
