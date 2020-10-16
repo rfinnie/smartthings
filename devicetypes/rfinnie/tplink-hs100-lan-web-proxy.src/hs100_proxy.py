@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# hs100_proxy - TP-LINK Smart Plug HS100/HS105/HS110 LAN web proxy
+# hs100_proxy - TP-LINK Smart Plug HS100 series LAN web proxy
 # Copyright (C) 2016 Ryan Finnie
 #
 # This program is free software; you can redistribute it and/or
@@ -19,9 +19,11 @@
 # 02110-1301, USA.
 
 import http.server
-import socket
 import json
+import logging
+import socket
 import struct
+import urllib.parse
 
 
 class HS100Handler(http.server.BaseHTTPRequestHandler):
@@ -72,31 +74,40 @@ class HS100Handler(http.server.BaseHTTPRequestHandler):
             )
         )
 
-    def error_500(self, message):
-        message_bytes = message.encode("UTF-8")
-        self.send_response(500)
-        self.send_header("Content-Type", "text/plain; charset=utf-8")
-        self.send_header("Content-Length", len(message_bytes))
-        self.end_headers()
-        self.wfile.write(message_bytes)
+    def do_request(self):
+        try:
+            path = urllib.parse.urlparse(self.path)
+
+            if self.command == "POST":
+                if not self.headers.get("Content-Length"):
+                    return self.send_error(400)
+                if path.path == "/command":
+                    return self.do_command()
+                else:
+                    return self.send_error(404)
+            elif self.command == "GET":
+                if path.path == "/":
+                    return self.do_index()
+                else:
+                    return self.send_error(404)
+            else:
+                return self.send_error(400)
+        except Exception:
+            logging.exception("Unknown error")
+            self.send_error(500)
 
     def do_POST(self):
-        if not self.headers.get("Content-Length"):
-            self.send_response(400)
-            self.send_header("Content-Type", "text/plain; charset=utf-8")
-            self.end_headers()
-            self.wfile.write("Content-Length required.".encode("UTF-8"))
-            return
+        return self.do_request()
+
+    def do_GET(self):
+        return self.do_request()
+
+    def do_command(self):
         command_data = self.rfile.read(int(self.headers.get("Content-Length")))
         self.post_body = command_data
-        try:
-            result = self.send_command(
-                self.config.hs100_addr, self.config.hs100_port, command_data
-            )
-        except socket.error as e:
-            return self.error_500(str(e))
-        except Exception as e:
-            return self.error_500("Unknown exception: " + str(e))
+        result = self.send_command(
+            self.config.hs100_addr, self.config.hs100_port, command_data
+        )
         self.send_response(200)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", len(result))
@@ -141,18 +152,13 @@ class HS100Handler(http.server.BaseHTTPRequestHandler):
 
         return output
 
-    def do_GET(self):
+    def do_index(self):
         command_data = json.dumps({"system": {"get_sysinfo": {"state": None}}}).encode(
             "UTF-8"
         )
-        try:
-            result = self.send_command(
-                self.config.hs100_addr, self.config.hs100_port, command_data
-            )
-        except socket.error as e:
-            return self.error_500(str(e))
-        except Exception as e:
-            return self.error_500("Unknown exception: " + str(e))
+        result = self.send_command(
+            self.config.hs100_addr, self.config.hs100_port, command_data
+        )
         result_d = json.loads(result.decode("UTF-8"))
         output = self.result_status_text(result_d)
         output_bytes = output.encode("UTF-8")
@@ -167,9 +173,10 @@ def parse_args():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="hs100_proxy - TP-LINK Smart Plug HS100/HS105/HS110 LAN web proxy",
+        description="hs100_proxy - TP-LINK Smart Plug HS100 series LAN web proxy",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    parser.add_argument("--debug", action="store_true", help="Print extra debugging")
     parser.add_argument(
         "--local-port", "-l", type=int, default=8362, help="local port for web server"
     )
@@ -181,16 +188,22 @@ def parse_args():
         "-p",
         type=int,
         default=9999,
-        help="port for HS100/HS105/HS110 device",
+        help="port for HS100 series device",
     )
     parser.add_argument(
-        "hs100_addr", type=str, help="address/hostname for HS100/HS105/HS110 device"
+        "hs100_addr", type=str, help="address/hostname for HS100 series device"
     )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     config = parse_args()
+
+    if config.debug:
+        logging_level = logging.DEBUG
+    else:
+        logging_level = logging.INFO
+    logging.basicConfig(level=logging_level)
     server_class = http.server.HTTPServer
     httpd = server_class((config.local_addr, config.local_port), HS100Handler)
     httpd.RequestHandlerClass.config = config
