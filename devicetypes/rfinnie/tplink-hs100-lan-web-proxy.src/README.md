@@ -1,7 +1,7 @@
-# TP-LINK Smart Plug HS100/HS105/HS110 (LAN web proxy)
+# TP-LINK Smart Plug HS100 series (LAN web proxy)
 
 The [TP-LINK HS100](http://www.tp-link.com/us/products/details/HS100.html) (and related family) is a WiFi smart plug.
-(For the rest of this document, "HS100" is presumed to be the entire HS100 family, including HS100, HS105 and HS110.)
+(For the rest of this document, "HS100" is presumed to be the entire HS100 family, including HS100, HS103, HS105, HS110 and others.)
 By default, it connects outbound to the Kasa service where it is managed remotely.
 However, it has an undocumented local interface on port 9999, which is XOR-obfuscated JSON, but is otherwise completely open.
 
@@ -10,7 +10,9 @@ This local LAN proxy allows for POSTing JSON to the service, and receiving JSON 
 
 Be warned: this handler and proxy rely on an undocumented and obfuscated protocol of the TP-LINK HS100, which could change at any time.
 It has been tested as of the following firmwares:
+
 * HS100: 1.2.5 Build 171129 Rel.174814
+* HS103: 1.1.2 Build 191113 Rel.095623
 * HS105: 1.5.6 Build 191114 Rel.104204
 * HS110: Untested, but presumed to work
 
