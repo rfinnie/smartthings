@@ -17,21 +17,18 @@ class HS100Handler(http.server.BaseHTTPRequestHandler):
     config = None
 
     def decode(self, input):
-        input_len = len(input)
         state = 0xAB
-        output = bytearray(input_len)
-        for pos in range(input_len):
-            i = input[pos]
+        output = bytearray(len(input))
+        for pos, i in enumerate(input):
             output[pos] = i ^ state
             state = i
         return bytes(output)
 
     def encode(self, input):
-        input_len = len(input)
         state = 0xAB
-        output = bytearray(input_len)
-        for pos in range(input_len):
-            state = input[pos] ^ state
+        output = bytearray(len(input))
+        for pos, i in enumerate(input):
+            state = i ^ state
             output[pos] = state
         return bytes(output)
 
