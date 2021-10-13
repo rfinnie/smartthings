@@ -38,10 +38,11 @@ class HS100Handler(http.server.BaseHTTPRequestHandler):
 
         sock.send(struct.pack("!l", len(command)) + self.encode(command))
 
-        result = self.decode(sock.recv(8192)[4:])
+        recv = sock.recv(8192)
         sock.close()
 
-        return result
+        assert (struct.unpack("!l", recv[0:4])[0] + 4) == len(recv)
+        return self.decode(recv[4:])
 
     def log_request(self, code="-", size="-", user_agent="-", extra="-"):
         if self.headers.get("User-Agent"):
